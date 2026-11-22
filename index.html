@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Plumb-Master Shop</title>
+<style>
+body{font-family:Arial;background:#f2f2f2;margin:0;padding-bottom:60px}
+header{background:#ff6600;color:#fff;padding:15px;text-align:center;position:sticky;top:0;z-index:10}
+header input{width:90%;padding:11px;border-radius:20px;border:none;margin-top:10px}
+.tabs{display:flex;background:#fff}
+.tabs button{flex:1;padding:14px;border:none;font-weight:bold;background:#fff}
+.tabs button.active{background:#ff6600;color:#fff}
+.card{background:#fff;margin:15px;padding:15px;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.1)}
+.card img{width:100%;height:180px;object-fit:cover;border-radius:10px}
+.price{color:#ff6600;font-size:22px;font-weight:bold}
+.stock{font-weight:bold;color:red}
+select,input{width:100%;padding:12px;margin:8px 0;border-radius:8px;border:1px solid #ccc;font-size:16px;box-sizing:border-box}
+button.add{width:100%;padding:13px;background:#ff6600;color:#fff;border:none;border-radius:8px;font-size:16px}
+button.buy{width:100%;padding:13px;background:green;color:#fff;border:none;border-radius:8px;font-size:16px;margin-top:8px}
+.colorbox{width:100%;height:18px;border-radius:6px;border:1px solid #ccc}
+.hidden-dot{position:fixed;bottom:5px;right:10px;color:#fa0909;font-size:20px;cursor:pointer;user-select:none}
+#adminPanel{display:none;background:#fff;margin:15px;padding:15px;border-radius:12px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+td,th{border:1px solid #ddd;padding:6px;text-align:left}
+td input{padding:6px;margin:0}
+</style>
+</head>
+<body>
+<header>
+<h2 style="margin:0">🔧 PLUMB-MASTER GHANA 🎨</h2>
+<p style="margin:5px">🛒 Cart: <span id="cart">0</span> items | <span id="cartTotal">GH₵ 0</span></p>
+<input placeholder="Search Bend, Tee, White paint...">
+</header>
+<div id="shopView">
+<div class="tabs">
+<button id="tab1" class="active" onclick="showTab('plumbing')">🔧 PLUMBING</button>
+<button id="tab2" onclick="showTab('paint')">🎨 PAINTS</button>
+</div>
+<div id="plumbing">
+<div class="card">
+<img src="https://images.unsplash.com/photo-1585704032915-c3400ca199e7?w=600">
+<h3>Plumbing Fittings - Bend / Tee / Y</h3>
+<p><span class="price">GH₵ 25</span> <s style="color:grey">GH₵ 35</s></p>
+<p class="stock" id="pStock"></p>
+<label>Type:</label>
+<select id="pType" onchange="updatePlumbing()"><option>Bend</option><option>Swept Tee</option><option>Tee</option><option>Y</option></select>
+<label>Size:</label>
+<select id="pSize" onchange="updatePlumbing()"><option>4"</option><option>3" x 45</option><option>3"</option><option>2" x 45</option><option>2"</option><option>1"</option></select>
+<button class="add" onclick="addPlumbing()">Add to Cart - GH₵ 25</button>
+</div>
+</div>
+<div id="paint" style="display:none">
+<div class="card">
+<img src="https://images.unsplash.com/photo-1562259949-e8e7689d7828?w=600">
+<h3>Emulsion Paint - Bucket & Gallon</h3>
+<p><span class="price" id="paintPrice">GH₵ 350</span> <s style="color:grey">GH₵ 420</s></p>
+<p class="stock" id="paintStock"></p>
+<div class="colorbox" id="colorPreview"></div>
+<label>Colour:</label>
+<select id="paintColor" onchange="updatePaint()"><option>White</option><option>Off White</option><option>Mango</option><option>Magnolia</option><option>Peach</option><option>Blue</option><option>Deep Blue</option><option>Sky Blue</option><option>Mint Green</option><option>Milo Green</option><option>Apple Green</option><option>Lemon Green</option><option>Cream</option><option>Purple</option><option>Pink</option><option>Grey</option><option>Beige</option><option>Sunshine</option><option>Ivory</option><option>Yellow</option><option>Putty</option><option>Terracota</option></select>
+<label>Container:</label>
+<select id="paintContainer" onchange="updatePaint()"><option>Bucket</option><option>Gallon</option></select>
+<button class="add" onclick="addPaint()">Add to Cart</button>
+</div>
+</div>
+<div class="card">
+<h3>💳 Checkout & Payment</h3>
+<input id="custName" placeholder="Your Full Name">
+<input id="custPhone" placeholder="Your Phone / MoMo Number">
+<input id="custLoc" placeholder="Your Location / Delivery Address">
+<label>Payment Method:</label>
+<select id="payMethod" onchange="showPayInfo()">
+<option>MTN MoMo</option><option>Telecel Cash</option><option>Cash on Delivery</option><option>Bank Transfer</option>
+</select>
+<div id="payInfo" style="background:#fff3e0;padding:10px;border-radius:8px;font-size:14px">📱 Pay to MTN MoMo: <b>053 733 7257</b><br>📱 Pay to Telecel Momo: <b>020 791 2357</b><br>Send the amount, then click Place Order below.</div>
+<p><b>Total to Pay: <span id="totalPay">GH₵ 0</span></b></p>
+<button class="buy" onclick="placeOrder()">✅ Place Order & Pay</button>
+<p style="font-size:12px;color:grey">After you click, your order would enter WhatsApp for confirmation.</p>
+</div>
+</div>
+<div id="adminPanel">
+<h2>🔐 ADMIN PANEL</h2>
+<p>Orders:</p>
+<div id="orderList" style="font-size:13px">No orders yet.</div>
+<h3>Edit Plumbing Stock</h3>
+<div id="adminPlumbing"></div>
+<h3>Edit Paint Stock</h3>
+<div id="adminPaint"></div>
+<button class="buy" onclick="saveAdmin()">💾 Save All Changes</button>
+<button style="width:100%;padding:10px;margin-top:10px" onclick="closeAdmin()">Close Admin</button>
+</div>
+<div class="hidden-dot" onclick="openAdmin()">.</div>
+<script>
+let cart=0,total=0,orders=[];
+let plumbingStock={"Bend":{"4\"":5,"3\" x 45":6,"3\"":11,"2\" x 45":1,"2\"":23,"1\"":0},"Swept Tee":{"4\"":11,"3\" x 45":0,"3\"":20,"2\" x 45":0,"2\"":0,"1\"":0},"Tee":{"4\"":2,"3\" x 45":0,"3\"":16,"2\" x 45":0,"2\"":20,"1\"":0},"Y":{"4\"":6,"3\" x 45":0,"3\"":10,"2\" x 45":0,"2\"":30,"1\"":0}};
+let paintStock={"White":[9,6],"Off White":[3,4],"Mango":[2,4],"Magnolia":[1,2],"Peach":[3,1],"Blue":[2,0],"Deep Blue":[0,1],"Sky Blue":[1,2],"Mint Green":[2,1],"Milo Green":[3,3],"Apple Green":[2,0],"Lemon Green":[2,0],"Cream":[3,1],"Purple":[2,4],"Pink":[3,1],"Grey":[1,2],"Beige":[1,5],"Sunshine":[1,2],"Ivory":[5,1],"Yellow":[2,1],"Putty":[2,0],"Terracota":[2,0]};
+let paintColors={"White":"#fff","Off White":"#f5f5dc","Mango":"#ff8c00","Magnolia":"#f8f4ff","Peach":"#ffdab9","Blue":"#0000ff","Deep Blue":"#00008b","Sky Blue":"#87ceeb","Mint Green":"#98ff98","Milo Green":"#4a6741","Apple Green":"#8db600","Lemon Green":"#c6e000","Cream":"#fffdd0","Purple":"#800080","Pink":"#ffc0cb","Grey":"#808080","Beige":"#f5f5dc","Sunshine":"#ffdf00","Ivory":"#fffff0","Yellow":"#ffff00","Putty":"#c0b090","Terracota":"#e2725b"};
+function showTab(id){document.getElementById('plumbing').style.display=id=='plumbing'?'block':'none';document.getElementById('paint').style.display=id=='paint'?'block':'none';document.getElementById('tab1').className=id=='plumbing'?'active':'';document.getElementById('tab2').className=id=='paint'?'active':'';}
+function updatePlumbing(){let t=document.getElementById('pType').value,s=document.getElementById('pSize').value,left=plumbingStock[t][s];document.getElementById('pStock').innerText=left==0?'❌ Out of Stock - '+t+' '+s:'🔥 Only '+left+' left - '+t+' '+s;}
+function addPlumbing(){let t=document.getElementById('pType').value,s=document.getElementById('pSize').value;if(plumbingStock[t][s]<=0){alert('Out of Stock!');return;}plumbingStock[t][s]--;cart++;total+=25;updateCart();updatePlumbing();}
+function updatePaint(){let c=document.getElementById('paintColor').value,cont=document.getElementById('paintContainer').value,left=cont=='Bucket'?paintStock[c][0]:paintStock[c][1];document.getElementById('paintPrice').innerText=cont=='Bucket'?'GH₵ 350':'GH₵ 120';document.getElementById('colorPreview').style.background=paintColors[c];document.getElementById('paintStock').innerText=left==0?'❌ Out of Stock - '+c+' '+cont:'🔥 Only '+left+' left - '+c+' '+cont;}
+function addPaint(){let c=document.getElementById('paintColor').value,cont=document.getElementById('paintContainer').value,idx=cont=='Bucket'?0:1;if(paintStock[c][idx]<=0){alert('Out of Stock!');return;}paintStock[c][idx]--;cart++;total+=cont=='Bucket'?350:120;updateCart();updatePaint();}
+function updateCart(){document.getElementById('cart').innerText=cart;document.getElementById('cartTotal').innerText='GH₵ '+total;document.getElementById('totalPay').innerText='GH₵ '+total;}
+function showPayInfo(){let m=document.getElementById('payMethod').value;let txt=m=='MTN MoMo'?'📱 Pay to MTN MoMo: <b>053 733 7257</b>':m=='Telecel Cash'?'📱 Pay to Telecel Momo: <b>020 791 2357</b>':m=='Cash on Delivery'?'💵 You go pay when we deliver. No need to send MoMo now.':'🏦 Bank Transfer - Contact us on WhatsApp 050 318 0838';document.getElementById('payInfo').innerHTML=txt;}
+function placeOrder(){let name=document.getElementById('custName').value,phone=document.getElementById('custPhone').value,loc=document.getElementById('custLoc').value,pay=document.getElementById('payMethod').value;if(!name||!phone||cart==0){alert('Please fill name, phone and add items to cart first!');return;}let msg='NEW ORDER - PLUMB-MASTER%0AName: '+name+'%0APhone: '+phone+'%0ALocation: '+loc+'%0APayment: '+pay+'%0AItems: '+cart+'%0ATotal: GH₵ '+total;orders.push(name+' - '+cart+' items - GH₵ '+total+' - '+pay);document.getElementById('orderList').innerHTML=orders.join('<br>');window.open('https://wa.me/233503180838?text='+msg,'_blank');alert('Order sent! We go confirm your payment soon.');}
+function openAdmin(){let p=prompt('Enter Admin Password:');let h=0;for(let i=0;i<p.length;i++){h=((h*31)+p.charCodeAt(i))>>>0;}if(h==148900385){document.getElementById('adminPanel').style.display='block';document.getElementById('shopView').style.display='none';buildAdmin();}else{alert('Wrong Password!');}}
+function closeAdmin(){document.getElementById('adminPanel').style.display='none';document.getElementById('shopView').style.display='block';}
+function buildAdmin(){let h='<table><tr><th>Type</th><th>Size</th><th>Stock</th></tr>';for(let t in plumbingStock){for(let s in plumbingStock[t]){h+='<tr><td>'+t+'</td><td>'+s+'</td><td><input id="pl-'+t+'-'+s+'" value="'+plumbingStock[t][s]+'"></td></tr>';}}h+='</table>';document.getElementById('adminPlumbing').innerHTML=h;let h2='<table><tr><th>Colour</th><th>Bucket</th><th>Gallon</th></tr>';for(let c in paintStock){h2+='<tr><td>'+c+'</td><td><input id="pt-b-'+c+'" value="'+paintStock[c][0]+'"></td><td><input id="pt-g-'+c+'" value="'+paintStock[c][1]+'"></td></tr>';}h2+='</table>';document.getElementById('adminPaint').innerHTML=h2;}
+function saveAdmin(){alert('Saved! Stock updated.');updatePlumbing();updatePaint();closeAdmin();}
+updatePlumbing();updatePaint();
+</script>
+</body>
+</html>
